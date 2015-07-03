@@ -57,11 +57,11 @@ Object.assign(ReactNativeClock.prototype, require('react-timer-mixin'));
 let styles = StyleSheet.create({
 
   View: {
+    // borderWidth: 1,
+    // borderColor: '#ffffff',
     padding: 20,
     justifyContent: 'center',
-    alignItems: 'center',
-    // borderWidth: 1,
-    // borderColor: '#ffffff'
+    alignItems: 'center'
   },
 
   Text: {
@@ -76,11 +76,11 @@ let styles = StyleSheet.create({
   },
 
   header: {
-    height: 40,
+    height: 40
   },
 
   main: {
-    flex: 1,
+    flex: 1
   },
 
   mainText: {
