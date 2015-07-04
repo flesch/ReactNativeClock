@@ -1,14 +1,20 @@
 'use strict';
 
 let React = require('react-native');
-let { AppRegistry, Component, Text, View, StyleSheet } = React;
+let { AppRegistry, Component, Text, View, StyleSheet, NativeModules, PanResponder } = React;
+let Dimensions = require('Dimensions')
 let moment = require('moment');
+
+let { Brightness } = NativeModules;
 
 class ReactNativeClock extends Component {
 
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      viewportHeight: Dimensions.get('window').height
+    };
+    this.panResponder = {};
   }
 
   tick() {
@@ -18,19 +24,47 @@ class ReactNativeClock extends Component {
 
   componentDidMount() {
     this.interval = this.setInterval(this.tick.bind(this), 1000);
+    Brightness.getBrightness((err, brightness) => {
+      this.setState({ brightness });
+    });
   }
 
   componentWillMount() {
     this.tick();
+    this.panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: this.onStartShouldSetPanResponder.bind(this),
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: this.handlePanResponderMove.bind(this),
+      onPanResponderRelease: this.handlePanResponderEnd.bind(this),
+      onPanResponderTerminate: this.handlePanResponderEnd.bind(this)
+    });
   }
 
   componentWillUnmount() {
     this.clearInterval(this.interval);
   }
 
+  onStartShouldSetPanResponder(e, gestureState) {
+    Brightness.getBrightness((err, brightness) => {
+      this.setState({ brightness });
+    });
+  }
+
+  handlePanResponderMove(e, gestureState) {
+    let percent = (gestureState.dy / this.state.viewportHeight) * -1;
+    let brightness = this.state.brightness + percent;
+    Brightness.setBrightness(brightness);
+  }
+
+  handlePanResponderEnd(e, gestureState) {
+    Brightness.getBrightness((err, brightness) => {
+      this.setState({ brightness });
+    });
+  }
+
   render() {
     return (
-      <View style={[styles.View, styles.application]}>
+      <View style={[styles.View, styles.application]} {...this.panResponder.panHandlers}>
         <View style={[styles.View, styles.header]}>
           <Text style={styles.Text}>{this.state.today}</Text>
         </View>
